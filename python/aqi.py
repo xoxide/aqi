@@ -3,7 +3,11 @@
 # "DATASHEET": http://cl.ly/ekot
 # https://gist.github.com/kadamski/92653913a53baf9dd1a8
 from __future__ import print_function
+<<<<<<< HEAD
 import serial, struct, sys, time, json, subprocess, configparser
+=======
+import serial, struct, sys, time, json, subprocess
+>>>>>>> c6a7211fb0df4bd57bb1910ca5795f881ea8dd16
 
 DEBUG = 0
 CMD_MODE = 2
@@ -16,6 +20,7 @@ MODE_ACTIVE = 0
 MODE_QUERY = 1
 PERIOD_CONTINUOUS = 0
 
+<<<<<<< HEAD
 
 config = configparser.ConfigParser()
 config.read('config/config.txt')
@@ -28,6 +33,12 @@ MQTT_PASSWORD = config['SETTINGS']['MQTT_PASSWORD']
 MQTT_PORT = config['SETTINGS']['MQTT_PORT']
 MQTT_CAFILE = config['SETTINGS']['MQTT_CAFILE']
 
+=======
+JSON_FILE = '/var/www/html/aqi.json'
+
+MQTT_HOST = ''
+MQTT_TOPIC = '/weather/particulatematter'
+>>>>>>> c6a7211fb0df4bd57bb1910ca5795f881ea8dd16
 
 ser = serial.Serial()
 ser.port = "/dev/ttyUSB0"
@@ -96,7 +107,10 @@ def cmd_query_data():
         values = process_data(d)
     return values
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> c6a7211fb0df4bd57bb1910ca5795f881ea8dd16
 def cmd_set_sleep(sleep):
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
@@ -120,10 +134,16 @@ def cmd_set_id(id):
     ser.write(construct_command(CMD_DEVICE_ID, [0]*10+[id_l, id_h]))
     read_response()
 
+<<<<<<< HEAD
 
 def pub_mqtt(jsonrow):
     cmd = ['mosquitto_pub', '--cafile', MQTT_CAFILE, '-h', MQTT_HOST, '-t', MQTT_TOPIC, '-p', MQTT_PORT, '-u', MQTT_USER, '-P', MQTT_PASSWORD, '-s']
 
+=======
+def pub_mqtt(jsonrow):
+    cmd = ['mosquitto_pub', '-h', MQTT_HOST, '-t', MQTT_TOPIC, '-s']
+    print('Publishing using:', cmd)
+>>>>>>> c6a7211fb0df4bd57bb1910ca5795f881ea8dd16
     with subprocess.Popen(cmd, shell=False, bufsize=0, stdin=subprocess.PIPE).stdin as f:
         json.dump(jsonrow, f)
 
@@ -132,12 +152,20 @@ if __name__ == "__main__":
     cmd_set_sleep(0)
     cmd_firmware_ver()
     cmd_set_working_period(PERIOD_CONTINUOUS)
+<<<<<<< HEAD
     cmd_set_mode(MODE_QUERY)
 
     while True:
         cmd_set_sleep(0)
         for t in range(15):
             values = cmd_query_data()
+=======
+    cmd_set_mode(MODE_QUERY);
+    while True:
+        cmd_set_sleep(0)
+        for t in range(15):
+            values = cmd_query_data();
+>>>>>>> c6a7211fb0df4bd57bb1910ca5795f881ea8dd16
             if values is not None and len(values) == 2:
               print("PM2.5: ", values[0], ", PM10: ", values[1])
               time.sleep(2)
