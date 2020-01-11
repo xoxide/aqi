@@ -21,13 +21,13 @@ PERIOD_CONTINUOUS = 0
 config = configparser.ConfigParser()
 config.read('config/config.txt')
 
-JSON_FILE = config['SETTINGS']['JSON_FILE']
-MQTT_HOST = config['SETTINGS']['MQTT_HOST']
-MQTT_TOPIC = config['SETTINGS']['MQTT_TOPIC']
-MQTT_USER = config['SETTINGS']['MQTT_USER']
-MQTT_PASSWORD = config['SETTINGS']['MQTT_PASSWORD']
-MQTT_PORT = config['SETTINGS']['MQTT_PORT']
-MQTT_CAFILE = config['SETTINGS']['MQTT_CAFILE']
+JSON_FILE = config.get('SETTINGS', 'JSON_FILE')
+MQTT_HOST = config.get('SETTINGS', 'MQTT_HOST')
+MQTT_TOPIC = config.get('SETTINGS', 'MQTT_TOPIC')
+MQTT_USER = config.get('SETTINGS', 'MQTT_USER')
+MQTT_PASSWORD = cconfig.get('SETTINGS', 'MQTT_PASSWORD')
+MQTT_PORT = config.get('SETTINGS', 'MQTT_PORT')
+MQTT_CAFILE = config.get('SETTINGS', 'MQTT_CAFILE')
 
 
 ser = serial.Serial()
