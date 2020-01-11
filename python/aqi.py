@@ -3,7 +3,7 @@
 # "DATASHEET": http://cl.ly/ekot
 # https://gist.github.com/kadamski/92653913a53baf9dd1a8
 from __future__ import print_function
-import serial, struct, sys, time, json, subprocess, configparser
+import serial, struct, sys, time, json, subprocess, ConfigParser
 
 
 DEBUG = 0
@@ -18,7 +18,7 @@ MODE_QUERY = 1
 PERIOD_CONTINUOUS = 0
 
 
-config = configparser.ConfigParser()
+config = ConfigParser.ConfigParser()
 config.read('config/config.txt')
 
 JSON_FILE = config.get('SETTINGS', 'JSON_FILE')
