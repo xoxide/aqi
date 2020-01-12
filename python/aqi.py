@@ -5,7 +5,6 @@
 from __future__ import print_function
 import serial, struct, sys, time, json, subprocess, ConfigParser
 
-
 DEBUG = 0
 CMD_MODE = 2
 CMD_QUERY_DATA = 4
@@ -17,7 +16,6 @@ MODE_ACTIVE = 0
 MODE_QUERY = 1
 PERIOD_CONTINUOUS = 0
 
-
 config = ConfigParser.ConfigParser()
 config.read('config/config.txt')
 
@@ -28,7 +26,8 @@ MQTT_USER = config.get('SETTINGS', 'MQTT_USER')
 MQTT_PASSWORD = config.get('SETTINGS', 'MQTT_PASSWORD')
 MQTT_PORT = config.get('SETTINGS', 'MQTT_PORT')
 MQTT_CAFILE = config.get('SETTINGS', 'MQTT_CAFILE')
-
+MQTT_CRT = config.get('SETTINGS', 'MQTT_CRT')
+MQTT_KEY = config.get('SETTINGS', 'MQTT_KEY')
 
 ser = serial.Serial()
 ser.port = "/dev/ttyUSB0"
@@ -46,8 +45,8 @@ def dump(d, prefix=''):
 
 def construct_command(cmd, data=[]):
     assert len(data) <= 12
-    data += [0,]*(12-len(data))
-    checksum = (sum(data)+cmd-2)%256
+    data += [0, ] * (12 - len(data))
+    checksum = (sum(data) + cmd - 2) % 256
     ret = "\xaa\xb4" + chr(cmd)
     ret += ''.join(chr(x) for x in data)
     ret += "\xff\xff" + chr(checksum) + "\xab"
@@ -59,17 +58,18 @@ def construct_command(cmd, data=[]):
 
 def process_data(d):
     r = struct.unpack('<HHxxBB', d[2:])
-    pm25 = r[0]/10.0
-    pm10 = r[1]/10.0
-    checksum = sum(ord(v) for v in d[2:8])%256
+    pm25 = r[0] / 10.0
+    pm10 = r[1] / 10.0
+    checksum = sum(ord(v) for v in d[2:8]) % 256
     return [pm25, pm10]
-    #print("PM 2.5: {} μg/m^3  PM 10: {} μg/m^3 CRC={}".format(pm25, pm10, "OK" if (checksum==r[2] and r[3]==0xab) else "NOK"))
+    # print("PM 2.5: {} μg/m^3  PM 10: {} μg/m^3 CRC={}".format(pm25, pm10, "OK" if (checksum==r[2] and r[3]==0xab) else "NOK"))
 
 
 def process_version(d):
     r = struct.unpack('<BBBHBB', d[3:])
-    checksum = sum(ord(v) for v in d[2:8])%256
-    print("Y: {}, M: {}, D: {}, ID: {}, CRC={}".format(r[0], r[1], r[2], hex(r[3]), "OK" if (checksum==r[4] and r[5]==0xab) else "NOK"))
+    checksum = sum(ord(v) for v in d[2:8]) % 256
+    print("Y: {}, M: {}, D: {}, ID: {}, CRC={}".format(r[0], r[1], r[2], hex(r[3]),
+                                                       "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
 
 def read_response():
@@ -116,15 +116,15 @@ def cmd_firmware_ver():
 
 
 def cmd_set_id(id):
-    id_h = (id>>8) % 256
+    id_h = (id >> 8) % 256
     id_l = id % 256
-    ser.write(construct_command(CMD_DEVICE_ID, [0]*10+[id_l, id_h]))
+    ser.write(construct_command(CMD_DEVICE_ID, [0] * 10 + [id_l, id_h]))
     read_response()
 
 
 def pub_mqtt(jsonrow):
-    cmd = ['mosquitto_pub', '--cafile', MQTT_CAFILE, '-h', MQTT_HOST, '-t', MQTT_TOPIC, '-p', MQTT_PORT, '-u', MQTT_USER, '-P', MQTT_PASSWORD, '-s']
-
+    cmd = ['mosquitto_pub', '-d', '--cafile', MQTT_CAFILE, '--cert', MQTT_CRT, '--key', MQTT_KEY, '-h', MQTT_HOST, '-t',
+           MQTT_TOPIC, '-p', MQTT_PORT, '-u', MQTT_USER, '-P', MQTT_PASSWORD, '-s']
 
     with subprocess.Popen(cmd, shell=False, bufsize=0, stdin=subprocess.PIPE).stdin as f:
         json.dump(jsonrow, f)
@@ -142,8 +142,8 @@ if __name__ == "__main__":
             values = cmd_query_data()
 
             if values is not None and len(values) == 2:
-              print("PM2.5: ", values[0], ", PM10: ", values[1])
-              time.sleep(2)
+                print("PM2.5: ", values[0], ", PM10: ", values[1])
+                time.sleep(2)
 
         # open stored data
         try:
@@ -166,7 +166,7 @@ if __name__ == "__main__":
 
         if MQTT_HOST != '':
             pub_mqtt(jsonrow)
-            
+
         print("Going to sleep for 1 min...")
         cmd_set_sleep(1)
         time.sleep(60)
