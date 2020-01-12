@@ -124,7 +124,7 @@ def cmd_set_id(id):
 
 def pub_mqtt(jsonrow):
     cmd = ['mosquitto_pub', '-d', '--cafile', MQTT_CAFILE, '--cert', MQTT_CRT, '--key', MQTT_KEY, '-h', MQTT_HOST, '-t',
-           MQTT_TOPIC, '-p', MQTT_PORT, '-u', MQTT_USER, '-P', MQTT_PASSWORD, '-s']
+           MQTT_TOPIC, '-p', MQTT_PORT, '-u', MQTT_USER, '-P', MQTT_PASSWORD, '-r', '-s']
 
     with subprocess.Popen(cmd, shell=False, bufsize=0, stdin=subprocess.PIPE).stdin as f:
         json.dump(jsonrow, f)
