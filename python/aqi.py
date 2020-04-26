@@ -217,11 +217,11 @@ def calc_aqi_pm10(pm10):
 
 
 if __name__ == "__main__":
+    reading_thread = threading.Thread(target=read_response)
     cmd_set_sleep(0)
     cmd_firmware_ver()
     cmd_set_working_period(PERIOD_CONTINUOUS)
     cmd_set_mode(MODE_QUERY)
-    reading_thread = threading.Thread(target=read_response)
 
     while True:
         cmd_set_sleep(0)
