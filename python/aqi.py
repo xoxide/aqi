@@ -120,6 +120,7 @@ def cmd_set_working_period(period):
 def cmd_firmware_ver():
     ser.write(construct_command(CMD_FIRMWARE))
     d = read_response()
+    print(d)
     process_version(d)
 
 
@@ -223,7 +224,7 @@ if __name__ == "__main__":
     cmd_set_mode(MODE_QUERY)
     reading_event = threading.Event()
     reading_thread = threading.Thread(target=read_response, daemon=True)
-    
+
     while True:
         cmd_set_sleep(0)
         for t in range(15):
