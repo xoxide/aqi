@@ -40,7 +40,6 @@ ser.xonxoff = False     #disable software flow control
 ser.rtscts = False     #disable hardware (RTS/CTS) flow control
 ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
 ser.writeTimeout = 2     #timeout for write
-reading_thread = threading.Thread(target=read_response)
 
 try:
     ser.open()
@@ -226,6 +225,8 @@ def calc_aqi_pm10(pm10):
         aqipm10 = ((aqi8 - aqi7) / (pm8 - pm7)) * (pm10 - pm7) + aqi7
 
     return aqipm10
+
+reading_thread = threading.Thread(target=read_response)
 
 
 if __name__ == "__main__":
