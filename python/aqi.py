@@ -104,7 +104,6 @@ def read_response():
 
 
 def cmd_set_mode(mode=MODE_QUERY):
-    print("setting mode")
     ser.write(construct_command(CMD_MODE, [0x1, mode]))
     read_response()
 
@@ -122,6 +121,7 @@ def cmd_set_sleep(sleep):
     print("setting sleep mode: " + str(sleep))
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
+    print("Reading response")
     read_response()
 
 
