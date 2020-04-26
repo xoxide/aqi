@@ -99,7 +99,7 @@ def read_response():
 
 def cmd_set_mode(mode=MODE_QUERY):
     ser.write(construct_command(CMD_MODE, [0x1, mode]))
-    #read_response()
+    read_response()
 
 
 def cmd_query_data():
@@ -115,13 +115,13 @@ def cmd_set_sleep(sleep):
     print("setting sleep mode: " + str(sleep))
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
-    #read_response()
+    read_response()
 
 
 def cmd_set_working_period(period):
     print("setting working period" + str(period))
     ser.write(construct_command(CMD_WORKING_PERIOD, [0x1, period]))
-    #read_response()
+    read_response()
 
 
 def cmd_firmware_ver():
@@ -135,7 +135,7 @@ def cmd_set_id(id):
     id_h = (id >> 8) % 256
     id_l = id % 256
     ser.write(construct_command(CMD_DEVICE_ID, [0] * 10 + [id_l, id_h]))
-    #read_response()
+    read_response()
 
 
 def pub_mqtt(jsonrow):
