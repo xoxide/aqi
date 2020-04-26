@@ -127,9 +127,9 @@ def cmd_set_working_period(period):
 
 
 def cmd_firmware_ver():
-    print("setting firmaware version")
     ser.write(construct_command(CMD_FIRMWARE))
-    d = read_response()
+    d = reading_thread.start()
+    #d = read_response()
     process_version(d)
 
 
