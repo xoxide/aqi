@@ -3,7 +3,7 @@
 # "DATASHEET": http://cl.ly/ekot
 # https://gist.github.com/kadamski/92653913a53baf9dd1a8
 from __future__ import print_function
-import serial, struct, sys, time, json, subprocess, ConfigParser, threading
+import serial, struct, sys, time, json, subprocess, ConfigParser
 
 DEBUG = 0
 CMD_MODE = 2
@@ -85,16 +85,22 @@ def process_version(d):
                                                        "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
 def read_response():
+    while (True):
+    # NB: for PySerial v3.0 or later, use property `in_waiting` instead of function `inWaiting()` below!
+        if (ser.inWaiting()>0): #if incoming bytes are waiting to be read from the serial input buffer
+            d = ser.read(ser.in_waiting)
+            time.sleep(0.01) # Optional: sleep 10 ms (0.01 sec) once per loop to let other threads on your PC run during this time. 
+    return d
   #return ser.read(ser.in_waiting or 1)
-     byte = 0
-     while byte != "\xaa":
-         byte = ser.read(size=1)
+    #  byte = 0
+    #  while byte != "\xaa":
+        #  byte = ser.read(size=1)
 
-     d = ser.read(ser.in_waiting)
+    #  d = ser.read(ser.in_waiting)
 
     # if DEBUG:
         # dump(d, '< ')
-     return byte + d
+    #  return byte + d
 
 
 def cmd_set_mode(mode=MODE_QUERY):
@@ -116,8 +122,7 @@ def cmd_set_sleep(sleep):
     print("setting sleep mode: " + str(sleep))
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
-    reading_thread.start()
-    # read_response()
+    read_response()
 
 
 def cmd_set_working_period(period):
@@ -128,8 +133,7 @@ def cmd_set_working_period(period):
 
 def cmd_firmware_ver():
     ser.write(construct_command(CMD_FIRMWARE))
-    d = reading_thread.start()
-    #d = read_response()
+    d = read_response()
     process_version(d)
 
 
@@ -225,9 +229,6 @@ def calc_aqi_pm10(pm10):
         aqipm10 = ((aqi8 - aqi7) / (pm8 - pm7)) * (pm10 - pm7) + aqi7
 
     return aqipm10
-
-reading_thread = threading.Thread(target=read_response)
-
 
 if __name__ == "__main__":
     cmd_set_sleep(0)
