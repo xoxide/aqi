@@ -114,14 +114,14 @@ def cmd_query_data():
 
 
 def cmd_set_sleep(sleep):
-    print("setting sleep mode: " + sleep)
+    print("setting sleep mode: " + str(sleep))
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
     read_response()
 
 
 def cmd_set_working_period(period):
-    print("setting working period" + period)
+    print("setting working period" + str(period))
     ser.write(construct_command(CMD_WORKING_PERIOD, [0x1, period]))
     read_response()
 
