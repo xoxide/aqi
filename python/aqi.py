@@ -84,7 +84,7 @@ def read_response():
     while byte != "\xaa":
         byte = ser.read(size=1)
 
-    d = ser.read(size=9)
+    d = ser.read(ser.inWaiting())
 
     if DEBUG:
         dump(d, '< ')
