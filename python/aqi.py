@@ -80,7 +80,7 @@ def process_version(d):
                                                        "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
 def read_response():
-  return ser.read(max(1, min(9, ser.in_waiting)))
+  return ser.read(max(1, min(8, ser.in_waiting)))
     # byte = 0
     # while byte != "\xaa":
         # byte = ser.read(size=1)
