@@ -79,14 +79,6 @@ def process_version(d):
     print("Y: {}, M: {}, D: {}, ID: {}, CRC={}".format(r[0], r[1], r[2], hex(r[3]),
                                                        "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
-reading_event = threading.Event()
-reading_thread = threading.Thread(target=read_response, daemon=True)
-def reading():
-    while reading_event.is_set():
-        raw_reading = ser.readline()
-        print(raw_reading)
-
-
 def read_response():
   return ser.read(max(1, min(9, ser.in_waiting)))
     # byte = 0
@@ -229,7 +221,9 @@ if __name__ == "__main__":
     cmd_firmware_ver()
     cmd_set_working_period(PERIOD_CONTINUOUS)
     cmd_set_mode(MODE_QUERY)
-
+    reading_event = threading.Event()
+    reading_thread = threading.Thread(target=read_response, daemon=True)
+    
     while True:
         cmd_set_sleep(0)
         for t in range(15):
