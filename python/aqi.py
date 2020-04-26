@@ -3,7 +3,7 @@
 # "DATASHEET": http://cl.ly/ekot
 # https://gist.github.com/kadamski/92653913a53baf9dd1a8
 from __future__ import print_function
-import serial, struct, sys, time, json, subprocess, ConfigParser
+import serial, struct, sys, time, json, subprocess, ConfigParser, threading
 
 DEBUG = 0
 CMD_MODE = 2
@@ -28,6 +28,7 @@ MQTT_PORT = config.get('SETTINGS', 'MQTT_PORT')
 MQTT_CAFILE = config.get('SETTINGS', 'MQTT_CAFILE')
 MQTT_CRT = config.get('SETTINGS', 'MQTT_CRT')
 MQTT_KEY = config.get('SETTINGS', 'MQTT_KEY')
+
 
 ser = serial.Serial()
 ser.port = "/dev/ttyUSB0"
@@ -78,17 +79,25 @@ def process_version(d):
     print("Y: {}, M: {}, D: {}, ID: {}, CRC={}".format(r[0], r[1], r[2], hex(r[3]),
                                                        "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
+reading_event = threading.Event()
+reading_thread = threading.Thread(target=read_response, daemon=True)
+def reading():
+    while reading_event.is_set():
+        raw_reading = ser.readline()
+        print(raw_reading)
+
 
 def read_response():
-    byte = 0
-    while byte != "\xaa":
-        byte = ser.read(size=1)
+  return ser.read(max(1, min(9, ser.in_waiting)))
+    # byte = 0
+    # while byte != "\xaa":
+        # byte = ser.read(size=1)
 
-    d = ser.read(ser.inWaiting())
+    # d = ser.read(ser.inWaiting())
 
-    if DEBUG:
-        dump(d, '< ')
-    return byte + d
+    # if DEBUG:
+        # dump(d, '< ')
+    # return byte + d
 
 
 def cmd_set_mode(mode=MODE_QUERY):
