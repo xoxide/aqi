@@ -86,14 +86,12 @@ def process_version(d):
                                                        "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
 def read_response():
-    while (True):
-    # NB: for PySerial v3.0 or later, use property `in_waiting` instead of function `inWaiting()` below!
-        if (ser.in_waiting > 0): #if incoming bytes are waiting to be read from the serial input buffer
-            d = ser.read(ser.in_waiting)
-            
-            time.sleep(0.01) # Optional: sleep 10 ms (0.01 sec) once per loop to let other threads on your PC run during this time. 
-        else:
-            return d
+    if (ser.in_waiting > 0):
+        d = ser.read(ser.in_waiting)
+        time.sleep(0.01) 
+        return d
+    else:
+        read_response()
 
   #return ser.read(ser.in_waiting or 1)
     #  byte = 0
