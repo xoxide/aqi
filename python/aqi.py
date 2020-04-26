@@ -260,6 +260,6 @@ if __name__ == "__main__":
 
             pub_mqtt(jsonrow)
 
-        print("Going to sleep for 1 min...")
         cmd_set_sleep(1)
+        print("Going to sleep for 1 min...")
         time.sleep(60)
