@@ -115,7 +115,6 @@ def cmd_set_sleep(sleep):
     print("setting sleep mode: " + str(sleep))
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
-    #print("Reading response")
     #read_response()
 
 
@@ -128,6 +127,7 @@ def cmd_set_working_period(period):
 def cmd_firmware_ver():
     ser.write(construct_command(CMD_FIRMWARE))
     d = read_response()
+    print(d)
     process_version(d)
 
 
