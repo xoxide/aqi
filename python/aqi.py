@@ -40,9 +40,9 @@ ser.xonxoff = False     #disable software flow control
 ser.rtscts = False     #disable hardware (RTS/CTS) flow control
 ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
 ser.writeTimeout = 2     #timeout for write
+reading_thread = threading.Thread(target=read_response)
 
 try:
-    print("connecting")
     ser.open()
     ser.flushInput()
 except ConnectionError as e:
@@ -117,7 +117,8 @@ def cmd_set_sleep(sleep):
     print("setting sleep mode: " + str(sleep))
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
-    read_response()
+    reading_thread.start()
+    # read_response()
 
 
 def cmd_set_working_period(period):
@@ -228,8 +229,6 @@ def calc_aqi_pm10(pm10):
 
 
 if __name__ == "__main__":
-    print("starting")
-    reading_thread = threading.Thread(target=read_response)
     cmd_set_sleep(0)
     cmd_firmware_ver()
     cmd_set_working_period(PERIOD_CONTINUOUS)
