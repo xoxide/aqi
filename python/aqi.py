@@ -32,6 +32,13 @@ MQTT_KEY = config.get('SETTINGS', 'MQTT_KEY')
 ser = serial.Serial()
 ser.port = "/dev/ttyUSB0"
 ser.baudrate = 9600
+#ser.timeout = None          #block read
+ser.timeout = 1            #non-block read
+#ser.timeout = 2              #timeout block read
+ser.xonxoff = False     #disable software flow control
+ser.rtscts = False     #disable hardware (RTS/CTS) flow control
+ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
+ser.writeTimeout = 2     #timeout for write
 
 ser.open()
 ser.flushInput()
@@ -234,13 +241,9 @@ if __name__ == "__main__":
         if len(data) > 100:
             data.pop(0)
 
-        pm25 = calc_aqi_pm25(values[0])
-        pm10 = calc_aqi_pm10(values[1])
-        print(pm25)
-        print(pm10)
 
         # append new values
-        jsonrow = {'pm25': pm25, 'pm10': pm10, 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
+        jsonrow = {'pm25': values[0], 'pm10': values[1], 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
         data.append(jsonrow)
 
         # save it
@@ -248,6 +251,11 @@ if __name__ == "__main__":
             json.dump(data, outfile)
 
         if MQTT_HOST != '':
+            pm25 = calc_aqi_pm25(values[0])
+            pm10 = calc_aqi_pm10(values[1])
+
+            jsonrow = {'pm25': pm25, 'pm10': pm10, 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
+
             pub_mqtt(jsonrow)
 
         print("Going to sleep for 1 min...")
