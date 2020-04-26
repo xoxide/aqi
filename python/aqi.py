@@ -90,6 +90,7 @@ def read_response():
     # NB: for PySerial v3.0 or later, use property `in_waiting` instead of function `inWaiting()` below!
         if (ser.in_waiting > 0): #if incoming bytes are waiting to be read from the serial input buffer
             d = ser.read(ser.in_waiting)
+            print(d)
             time.sleep(0.01) # Optional: sleep 10 ms (0.01 sec) once per loop to let other threads on your PC run during this time. 
     return d
   #return ser.read(ser.in_waiting or 1)
