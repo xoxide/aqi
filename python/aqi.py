@@ -44,6 +44,7 @@ ser.writeTimeout = 2     #timeout for write
 try:
     ser.open()
     ser.flushInput()
+    ser.flushOutput()
 except ConnectionError as e:
     print(e)
 except:
@@ -231,48 +232,53 @@ def calc_aqi_pm10(pm10):
     return aqipm10
 
 if __name__ == "__main__":
-    cmd_set_sleep(0)
-    cmd_firmware_ver()
-    cmd_set_working_period(PERIOD_CONTINUOUS)
-    cmd_set_mode(MODE_QUERY)
-
-    while True:
+    try:
         cmd_set_sleep(0)
-        for t in range(15):
-            values = cmd_query_data()
+        cmd_firmware_ver()
+        cmd_set_working_period(PERIOD_CONTINUOUS)
+        cmd_set_mode(MODE_QUERY)
 
-            if values is not None and len(values) == 2:
-                print("PM2.5: ", values[0], ", PM10: ", values[1])
-                time.sleep(2)
+        while True:
+            cmd_set_sleep(0)
+            for t in range(15):
+                values = cmd_query_data()
 
-        # open stored data
-        try:
-            with open(JSON_FILE) as json_data:
-                data = json.load(json_data)
-        except IOError as e:
-            data = []
+                if values is not None and len(values) == 2:
+                    print("PM2.5: ", values[0], ", PM10: ", values[1])
+                    time.sleep(2)
 
-        # check if length is more than 100 and delete first element
-        if len(data) > 100:
-            data.pop(0)
+            # open stored data
+            try:
+                with open(JSON_FILE) as json_data:
+                    data = json.load(json_data)
+            except IOError as e:
+                data = []
+
+            # check if length is more than 100 and delete first element
+            if len(data) > 100:
+                data.pop(0)
 
 
-        # append new values
-        jsonrow = {'pm25': values[0], 'pm10': values[1], 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
-        data.append(jsonrow)
+            # append new values
+            jsonrow = {'pm25': values[0], 'pm10': values[1], 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
+            data.append(jsonrow)
 
-        # save it
-        with open(JSON_FILE, 'w') as outfile:
-            json.dump(data, outfile)
+            # save it
+            with open(JSON_FILE, 'w') as outfile:
+                json.dump(data, outfile)
 
-        if MQTT_HOST != '':
-            pm25 = calc_aqi_pm25(values[0])
-            pm10 = calc_aqi_pm10(values[1])
+            if MQTT_HOST != '':
+                pm25 = calc_aqi_pm25(values[0])
+                pm10 = calc_aqi_pm10(values[1])
 
-            jsonrow = {'pm25': pm25, 'pm10': pm10, 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
+                jsonrow = {'pm25': pm25, 'pm10': pm10, 'time': time.strftime("%d.%m.%Y %H:%M:%S")}
 
-            pub_mqtt(jsonrow)
+                pub_mqtt(jsonrow)
 
-        cmd_set_sleep(1)
-        print("Going to sleep for 1 min...")
-        time.sleep(60)
+            cmd_set_sleep(1)
+            print("Going to sleep for 1 min...")
+            time.sleep(60)
+    except KeyboardInterrupt as e:
+        print(e)
+    finally:
+        ser.close()
