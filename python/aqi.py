@@ -80,16 +80,16 @@ def process_version(d):
                                                        "OK" if (checksum == r[4] and r[5] == 0xab) else "NOK"))
 
 def read_response():
-  return ser.read(max(1, min(8, ser.in_waiting)))
-    # byte = 0
-    # while byte != "\xaa":
-        # byte = ser.read(size=1)
+  #return ser.read(ser.in_waiting or 1)
+     byte = 0
+     while byte != "\xaa":
+         byte = ser.read(size=1)
 
-    # d = ser.read(ser.inWaiting())
+     d = ser.read(ser.in_waiting)
 
     # if DEBUG:
         # dump(d, '< ')
-    # return byte + d
+     return byte + d
 
 
 def cmd_set_mode(mode=MODE_QUERY):
@@ -120,7 +120,6 @@ def cmd_set_working_period(period):
 def cmd_firmware_ver():
     ser.write(construct_command(CMD_FIRMWARE))
     d = read_response()
-    print(d)
     process_version(d)
 
 
@@ -222,8 +221,7 @@ if __name__ == "__main__":
     cmd_firmware_ver()
     cmd_set_working_period(PERIOD_CONTINUOUS)
     cmd_set_mode(MODE_QUERY)
-    reading_event = threading.Event()
-    reading_thread = threading.Thread(target=read_response, daemon=True)
+    reading_thread = threading.Thread(target=read_response)
 
     while True:
         cmd_set_sleep(0)
