@@ -41,8 +41,14 @@ ser.rtscts = False     #disable hardware (RTS/CTS) flow control
 ser.dsrdtr = False       #disable hardware (DSR/DTR) flow control
 ser.writeTimeout = 2     #timeout for write
 
-ser.open()
-ser.flushInput()
+try:
+    print("connecting")
+    ser.open()
+    ser.flushInput()
+except ConnectionError as e:
+    print(e)
+except:
+    print("an error occured at connection")
 
 byte, data = 0, ""
 
@@ -93,6 +99,7 @@ def read_response():
 
 
 def cmd_set_mode(mode=MODE_QUERY):
+    print("setting mode")
     ser.write(construct_command(CMD_MODE, [0x1, mode]))
     read_response()
 
@@ -107,17 +114,20 @@ def cmd_query_data():
 
 
 def cmd_set_sleep(sleep):
+    print("setting sleep mode: " + sleep)
     mode = 0 if sleep else 1
     ser.write(construct_command(CMD_SLEEP, [0x1, mode]))
     read_response()
 
 
 def cmd_set_working_period(period):
+    print("setting working period" + period)
     ser.write(construct_command(CMD_WORKING_PERIOD, [0x1, period]))
     read_response()
 
 
 def cmd_firmware_ver():
+    print("setting firmaware version")
     ser.write(construct_command(CMD_FIRMWARE))
     d = read_response()
     process_version(d)
@@ -131,6 +141,7 @@ def cmd_set_id(id):
 
 
 def pub_mqtt(jsonrow):
+    print("writting mqtt message")
     cmd = ['mosquitto_pub', '-d', '--cafile', MQTT_CAFILE, '--cert', MQTT_CRT, '--key', MQTT_KEY, '-h', MQTT_HOST, '-t',
            MQTT_TOPIC, '-p', MQTT_PORT, '-u', MQTT_USER, '-P', MQTT_PASSWORD, '-r', '-s']
 
@@ -217,6 +228,7 @@ def calc_aqi_pm10(pm10):
 
 
 if __name__ == "__main__":
+    print("starting")
     reading_thread = threading.Thread(target=read_response)
     cmd_set_sleep(0)
     cmd_firmware_ver()
